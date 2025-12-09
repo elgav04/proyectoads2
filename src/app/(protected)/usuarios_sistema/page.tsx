@@ -166,55 +166,53 @@ export default function UsuariosPage() {
                 </button>
             </div>
 
-            <table className="table table-bordered table-hover">
-                <thead className="table-dark">
-                <tr className="text-center">
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    {isAdmin && <th>Clave</th>}
-                    <th>Rol</th>
-                    <th>Empleado</th>
-                    <th>Estado</th>
-                    <th colSpan={2}>Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {usuarios.map((u) => {
-                        const isFilaAdmin  = u.Rol === "Administrador";
-                        const isFilaOwner = Number(currentUser.id) === u.Id;
-                        const canEdit = isAdmin || isFilaOwner; 
-                        const canDelete = isAdmin && !isFilaAdmin; 
-                        return (
-                        <tr key={u.Id} className="align-middle text-center">
-                            <td>{u.Id}</td>
-                            <td>{u.Usuario}</td>
-                            {isAdmin && <td>{u.Clave}</td>}
-                            <td>{u.Rol}</td>
-                            <td>{u.Nombres} {u.Apellidos}</td>
-                            <td>
-                                <span className={`badge fs-7 px-3 py-2 ${u.Estado === "Activo" ? "bg-success" : "bg-secondary"}`}>
-                                    {u.Estado}
-                                </span>
-                            </td>
-                            <td>
-                            <button className="btn btn-warning btn-sm" onClick={() => abrirFormularioEditar(u.Id)} disabled={!canEdit}>
-                                <i className="bi bi-pencil"></i> Actualizar
-                            </button>
-                            </td>
-                            <td>
-                            <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => eliminarUsuario(u.Id)}
-                                disabled={!canDelete}
-                            >
-                                <i className="bi bi-trash"></i> Eliminar
-                            </button>
-                            </td>
-                        </tr>
-                        );
-                    })}
-                    </tbody>
-            </table>
+            <div className="table-responsive">
+                <table className="table table-bordered table-hover">
+                    <thead className="table-dark">
+                    <tr className="text-center">
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        {isAdmin && <th>Clave</th>}
+                        <th>Rol</th>
+                        <th>Empleado</th>
+                        <th>Estado</th>
+                        <th colSpan={2}>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {usuarios.map((u) => {
+                            const isFilaAdmin  = u.Rol === "Administrador";
+                            const isFilaOwner = Number(currentUser.id) === u.Id;
+                            const canEdit = isAdmin || isFilaOwner; 
+                            const canDelete = isAdmin && !isFilaAdmin; 
+                            return (
+                            <tr key={u.Id} className="align-middle text-center">
+                                <td className="nowrap">{u.Id}</td>
+                                <td className="nowrap">{u.Usuario}</td>
+                                {isAdmin && <td className="nowrap">{u.Clave}</td>}
+                                <td className="nowrap">{u.Rol}</td>
+                                <td className="nowrap">{u.Nombres} {u.Apellidos}</td>
+                                <td>
+                                    <span className={`badge fs-7 px-3 py-2 ${u.Estado === "Activo" ? "bg-success" : "bg-secondary"}`}>
+                                        {u.Estado}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button className="btn btn-warning btn-sm" onClick={() => abrirFormularioEditar(u.Id)} disabled={!canEdit}>
+                                        <i className="bi bi-pencil"></i> Actualizar
+                                    </button>
+                                </td>
+                                <td>
+                                <button className="btn btn-danger btn-sm" onClick={() => eliminarUsuario(u.Id)} disabled={!canDelete}>
+                                    <i className="bi bi-trash"></i> Eliminar
+                                </button>
+                                </td>
+                            </tr>
+                            );
+                        })}
+                        </tbody>
+                </table>
+            </div>
 
             {/* Modal */}
             {showModal && (

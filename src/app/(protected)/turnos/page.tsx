@@ -148,47 +148,49 @@ export default function AreasPage() {
         </button>
       </div>
 
-      <table className="table table-bordered table-hover">
-        <thead className="table-dark">
-          <tr className="text-center">
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Hora Entrada</th>
-            <th>Hora Salida</th>
-            <th>Estado</th>
-            <th colSpan={2}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {turnos.map((a) => {
-            //console.log("Turnos prueba:", a); 
-            return (
-              <tr key={a.Id} className="align-middle">
-                <td className="text-center">{a.Id}</td>
-                <td className="text-center">{a.Nombre}</td>
-                <td className="text-center">{a.HoraEntrada?.slice(0, 5)}</td>
-                <td className="text-center">{a.HoraSalida?.slice(0, 5)}</td>
-                <td className="text-center">
-                  <span className={`badge fs-7 px-3 py-2 ${a.Estado === "Activo" ? "bg-success" : "bg-secondary"}`}>
-                    {a.Estado}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <button className="btn btn-warning btn-sm" onClick={() => abrirFormularioEditar(a.Id)}>
-                    <i className="bi bi-pencil"></i> Actualizar
-                  </button>
-                </td>
-                <td className="text-center">
-                  <button className="btn btn-danger btn-sm" onClick={() => eliminarTurno(a.Id)}>
-                    <i className="bi bi-trash"></i> Eliminar
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
+      <div className="table-responsive">
+        <table className="table table-bordered table-hover">
+          <thead className="table-dark">
+            <tr className="text-center">
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Hora Entrada</th>
+              <th>Hora Salida</th>
+              <th>Estado</th>
+              <th colSpan={2}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {turnos.map((a) => {
+              //console.log("Turnos prueba:", a); 
+              return (
+                <tr key={a.Id} className="align-middle">
+                  <td className="text-center">{a.Id}</td>
+                  <td className="text-center">{a.Nombre}</td>
+                  <td className="text-center">{a.HoraEntrada?.slice(0, 5)}</td>
+                  <td className="text-center">{a.HoraSalida?.slice(0, 5)}</td>
+                  <td className="text-center">
+                    <span className={`badge fs-7 px-3 py-2 ${a.Estado === "Activo" ? "bg-success" : "bg-secondary"}`}>
+                      {a.Estado}
+                    </span>
+                  </td>
+                  <td className="text-center">
+                    <button className="btn btn-warning btn-sm" onClick={() => abrirFormularioEditar(a.Id)}>
+                      <i className="bi bi-pencil"></i> Actualizar
+                    </button>
+                  </td>
+                  <td className="text-center">
+                    <button className="btn btn-danger btn-sm" onClick={() => eliminarTurno(a.Id)}>
+                      <i className="bi bi-trash"></i> Eliminar
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      
       {/* Modal edicion */}
       {showModal && (
         <div className="modal-overlay">

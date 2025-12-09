@@ -162,31 +162,60 @@ export default function RegistrosPage() {
 
       <div className="card mb-3">
         <div className="card-body">
-          <div className="row g-2">
-            <div className="col-md-4">
-              <label className="form-label small mb-1">Buscar (Enroll, Empleado, Cargo, Área, Turno)</label>
-              <input type="text" className="form-control form-control" placeholder="1001, Juan Medina, Contador, etc" value={query} onChange={(e) => setQuery(e.target.value)}/>
+          <div className="d-flex flex-wrap gap-2">
+
+            {/* Input de búsqueda */}
+            <div className="flex-grow-1 min-w-200 d-flex flex-column">
+              <label className="form-label small mb-1">
+                Buscar (Enroll, Empleado, Cargo, Área, Turno)
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="1001, Juan Medina, Contador, etc"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
             </div>
 
-            <div className="col-md-3">
-              <label className="form-label small mb-1">Desde</label>
-              <input type="date" className="form-control form-control" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}/>
-            </div>
+            {/* Inputs de fecha y botón */}
+            <div className="d-flex gap-2 flex-wrap">
 
-            <div className="col-md-3">
-              <label className="form-label small mb-1">Hasta</label>
-              <input type="date" className="form-control form-control" value={dateTo} onChange={(e) => setDateTo(e.target.value)}/>
-            </div>
+              <div className="d-flex flex-column flex-shrink-0">
+                <label className="form-label small mb-1">Desde</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
 
-            <div className="col-md-2 d-flex align-items-end">
-              <button className="btn btn-warning w-100" onClick={() => {setQuery("");setDateFrom("");setDateTo("");}}>
-                <i className="bi bi-eraser"></i> Limpiar filtros
-              </button>
-            </div>
+              <div className="d-flex flex-column flex-shrink-0">
+                <label className="form-label small mb-1">Hasta</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
 
+              <div className="d-flex flex-column flex-shrink-0">
+                <button
+                  className="btn btn-warning mt-auto"
+                  onClick={() => { setQuery(""); setDateFrom(""); setDateTo(""); }}
+                >
+                  <i className="bi bi-eraser"></i> Limpiar filtros
+                </button>
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
+
+
 
       <div className="table-responsive">
         <table className="table table table-bordered table-striped align-middle">
@@ -237,14 +266,15 @@ export default function RegistrosPage() {
         </table>
       </div>
 
-      <div className="d-flex justify-content-between align-items-center mt-2 small">
-        <div>
+      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-2 small">
+
+        <div className="mb-2 mb-sm-0 text-center text-sm-start">
           Mostrando {totalRegistros === 0 ? 0 : (paginaActual - 1) * pageSize + 1} - {Math.min(paginaActual * pageSize, totalRegistros)} de {totalRegistros}
         </div>
 
         <div>
           <nav>
-            <ul className="pagination pagination-sm mb-0">
+            <ul className="pagination pagination-sm mb-0 justify-content-center justify-content-sm-start">
               <li className={`page-item ${paginaActual === 1 ? "disabled" : ""}`}>
                 <button className="page-link" onClick={primera}>« Primera</button>
               </li>

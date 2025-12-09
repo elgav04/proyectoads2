@@ -297,7 +297,7 @@ export default function FormEmpleadoPage() {
       </form>
 
       {showToast && (
-        <div className="toast-container position-fixed top-0 end-0 p-3" style={{ zIndex: 2000 }}>
+        <div className="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style={{ zIndex: 2000 }}>
           <div className="toast show border-0 text-dark" role="alert" aria-live="assertive" aria-atomic="true">
             <div className="toast-header bg-secondary bg-opacity-25">
               <i className="bi bi-check-circle-fill text-success me-2"></i>

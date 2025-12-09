@@ -32,23 +32,19 @@ function ProtectedContent({ children }: { children: React.ReactNode }) {
   if (status === "loading" || !session) return null;
 
   return (
-    <div
-      className="d-flex"
-      style={{ minHeight: "100vh", overflow: "hidden" }} 
-    >
+    <div className="d-flex">
       <Sidebar />
 
       <main
-        className="flex-grow-1 p-4 bg-light"
+        className="main-content p-4 bg-light"
         style={{
-            marginLeft: "230px",
-            minHeight: "100vh",
-            overflowY: "auto",
-            overflowX: "auto",
+          minHeight: "100vh",
+          overflowY: "auto",
+          overflowX: "auto",
         }}
-        >
+      >
         {children}
-        </main>
+      </main>
     </div>
   );
 }
