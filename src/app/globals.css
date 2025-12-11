@@ -235,3 +235,18 @@ a {
 }
 
 
+
+
+
+
+/* arreglar texto blanco en movil */
+label, h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea {
+  color: #171717 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #171717 !important;
+  opacity: 1; 
+}
+
