@@ -28,10 +28,23 @@ export default function LoginPage() {
 
     setLoading(false);
 
+    //errores login
     if (res?.error) {
-      setError("Usuario o contraseña incorrectos");
+      switch (res.error) {
+        case "invalid":
+          setError("Usuario o contraseña incorrectos");
+          break;
+        case "blocked":
+          setError("Usuario no permitido o inactivo");
+          break;
+        case "server":
+          setError("No se pudo validar con el servidor, intente más tarde");
+          break;
+        default:
+          setError("Error desconocido");
+      }
     } else {
-      router.push("/"); // redirige a la página principal
+      router.push("/"); //redirir
     }
   };
 

@@ -12,18 +12,26 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials) return null;
-
-        const conn = await connect();
+      
+        let conn;
+        try {
+          conn = await connect();
+        } catch (err) {
+          // Error de conexion bd
+          throw new Error("server");
+        }
+      
         const [usuarios] = await conn.query<any[]>(
           "SELECT * FROM usuario_sistema WHERE Usuario = ?",
           [credentials.Usuario]
         );
         await conn.end();
-
+      
         const user = usuarios[0];
-        if (!user || user.Estado !== "Activo") return null;
-        if (user.Clave !== credentials.Clave) return null; 
-
+      
+        if (!user || user.Clave !== credentials.Clave) throw new Error("invalid");
+        if (user.Estado !== "Activo") throw new Error("blocked");
+      
         return {
           id: user.Id.toString(),
           name: user.Usuario,
