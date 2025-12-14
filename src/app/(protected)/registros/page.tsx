@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "@/src/components/ProtectedRoute";
 import ExcelJS from "exceljs";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { saveAs } from "file-saver";
 
 export default function RegistrosPage() {
@@ -69,14 +70,8 @@ export default function RegistrosPage() {
 
   //traducir info de InOutMode
   const getInOutTraduccion = (codigo: number) => {
-    const modos: any = {
-      0: "Entrada",
-      1: "Salida",
-      2: "Entrada (Auto)",
-      3: "Salida (Auto)",
-    };
-    return modos[codigo] || `Modo ${codigo}`;
-  };
+    return `Modo: ${codigo}`;
+};
 
   const formatFecha = (fechaHora: string) => {
     if (!fechaHora) return "";
@@ -141,7 +136,8 @@ export default function RegistrosPage() {
   const siguiente = () => setPage((p) => Math.min(totalPaginas, p + 1));
   const ultima = () => setPage(totalPaginas);
 
-  // EXPORTAR a Excel
+
+  //exportar a Excel
   const ExportExcel = async () => {
     if (registrosFiltrados.length === 0) {
       alert("No hay registros para exportar");
@@ -168,14 +164,13 @@ export default function RegistrosPage() {
         { header: "Estado", key: "estado", width: 25 },
       ];
   
-      //encabezados
       ws.getRow(1).eachCell((cell) => {
         cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
         cell.alignment = { horizontal: "center", vertical: "middle" };
         cell.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: "FF1F4E78" }, 
+          fgColor: { argb: "FF1F4E78" },
         };
         cell.border = {
           top: { style: "thin" },
@@ -185,26 +180,37 @@ export default function RegistrosPage() {
         };
       });
   
-      //agregar filas
       registrosFiltrados.forEach((r, i) => {
         let estado = "No marcó a tiempo";
-        let colorEstado = "FFFA9898"; 
+        let colorEstado = "FFFA9898";
   
+        //evaluar entrada
         if (r.HoraEntrada) {
           const fechaMarcaje = new Date(r.FechaHora);
           const [h, m] = r.HoraEntrada.split(":").map(Number);
-          const fechaTurno = new Date(fechaMarcaje);
-          fechaTurno.setHours(h, m, 0, 0);
+          const fechaInicio = new Date(fechaMarcaje);
+          fechaInicio.setHours(h, m, 0, 0);
   
-          const diffMs = fechaMarcaje.getTime() - fechaTurno.getTime();
-          const diffMin = diffMs / 60000; 
-  
+          const diffMin = (fechaMarcaje.getTime() - fechaInicio.getTime()) / 60000;
           if (diffMin <= 0) {
             estado = "Marcó a tiempo";
-            colorEstado = "FFC6EFCE"; 
+            colorEstado = "FFC6EFCE";
           } else if (diffMin <= 15) {
             estado = "Marcaje tardío";
-            colorEstado = "FFFFF2CC"; 
+            colorEstado = "FFFFF2CC";
+          }
+        }
+  
+        //evaluar salida
+        if (r.HoraSalida) {
+          const fechaMarcaje = new Date(r.FechaHora);
+          const [h, m] = r.HoraSalida.split(":").map(Number);
+          const fechaSalida = new Date(fechaMarcaje);
+          fechaSalida.setHours(h, m, 0, 0);
+  
+          if (fechaMarcaje.getTime() >= fechaSalida.getTime()) {
+            estado = "Marcaje correcto";
+            colorEstado = "FFC6EFCE";
           }
         }
   
@@ -224,7 +230,6 @@ export default function RegistrosPage() {
           estado,
         });
   
-        //formatear estado
         const estadoCell = row.getCell("estado");
         estadoCell.fill = {
           type: "pattern",
@@ -242,6 +247,111 @@ export default function RegistrosPage() {
     }
   };
 
+  //exportar a pdf
+  const ExportPDF = async () => {
+    if (registrosFiltrados.length === 0) {
+      alert("No hay registros para exportar");
+      return;
+    }
+  
+    try {
+      const pdfDoc = await PDFDocument.create();
+      let page = pdfDoc.addPage([1200, 850]);
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const fontSize = 10;
+      let y = 790;
+  
+      page.drawText("Reporte de Asistencia", { x: 50, y, size: 16, font: fontBold, color: rgb(0, 0, 0) });
+      page.drawText(`Fecha de generación: ${new Date().toLocaleString()}`, { x: 50, y: y - 15, size: 10, font, color: rgb(0, 0, 0) });
+      y -= 50;
+  
+      const headers = ["#", "EnrollNumber", "Empleado", "Cargo", "Área", "Turno", "Método", "Tipo Marcaje", "Fecha", "Hora Marcaje", "Hora Entrada", "Hora Salida", "Estado"];
+      const colWidths = [30, 80, 150, 150, 80, 100, 60, 80, 60, 70, 70, 70, 120];
+  
+      let x = 50;
+      headers.forEach((header, i) => {
+        page.drawRectangle({ x, y: y - 2, width: colWidths[i], height: fontSize + 6, color: rgb(0.12, 0.31, 0.47) });
+        page.drawText(header, { x: x + 2, y, size: fontSize, font: fontBold, color: rgb(1, 1, 1) });
+        x += colWidths[i];
+      });
+      y -= 20;
+  
+      registrosFiltrados.forEach((r, index) => {
+        x = 50;
+        let estado = "No marcó a tiempo";
+        let colorEstado = rgb(1, 0, 0);
+  
+        if (r.HoraEntrada) {
+          const fechaMarcaje = new Date(r.FechaHora);
+          const [h, m] = r.HoraEntrada.split(":").map(Number);
+          const fechaInicio = new Date(fechaMarcaje);
+          fechaInicio.setHours(h, m, 0, 0);
+  
+          const diffMin = (fechaMarcaje.getTime() - fechaInicio.getTime()) / 60000;
+          if (diffMin <= 0) {
+            estado = "Marcó a tiempo";
+            colorEstado = rgb(0, 0.6, 0);
+          } else if (diffMin <= 15) {
+            estado = "Marcaje tardío";
+            colorEstado = rgb(1, 0.85, 0);
+          }
+        }
+  
+        if (r.HoraSalida) {
+          const fechaMarcaje = new Date(r.FechaHora);
+          const [h, m] = r.HoraSalida.split(":").map(Number);
+          const fechaSalida = new Date(fechaMarcaje);
+          fechaSalida.setHours(h, m, 0, 0);
+  
+          if (fechaMarcaje.getTime() >= fechaSalida.getTime()) {
+            estado = "Marcaje correcto";
+            colorEstado = rgb(0, 0.6, 0);
+          }
+        }
+  
+        const values = [
+          index + 1,
+          r.EnrollNumber,
+          `${r.Nombres} ${r.Apellidos}`,
+          r.Cargo,
+          r.Area ?? r["a.Nombre"] ?? "",
+          r.Turno,
+          getVerifyModeTraduccion(Number(r.VerifyMode)),
+          getInOutTraduccion(Number(r.InOutMode)),
+          formatFecha(r.FechaHora),
+          formatHora(r.FechaHora),
+          r.HoraEntrada ?? "",
+          r.HoraSalida ?? "",
+          estado,
+        ];
+  
+        if (index % 2 === 0) {
+          page.drawRectangle({ x: 50, y: y - 2, width: colWidths.reduce((a, b) => a + b, 0), height: fontSize + 6, color: rgb(0.95, 0.95, 0.95) });
+        }
+  
+        values.forEach((val, i) => {
+          const isEstado = i === values.length - 1;
+          const textColor = isEstado ? colorEstado : rgb(0, 0, 0);
+          page.drawText(String(val), { x, y, size: fontSize, font, color: textColor });
+          x += colWidths[i];
+        });
+  
+        y -= 20;
+        if (y < 50) {
+          page = pdfDoc.addPage([1200, 850]);
+          y = 820;
+        }
+      });
+  
+      const pdfBytes = await pdfDoc.save();
+      saveAs(new Blob([pdfBytes], { type: "application/pdf" }), `asistencia_${Date.now()}.pdf`);
+    } catch (err) {
+      console.error("Error exportando PDF:", err);
+      alert("Error exportando PDF");
+    }
+  };
+
   return (
     <ProtectedRoute>
     <div>
@@ -251,6 +361,10 @@ export default function RegistrosPage() {
         <div className="d-flex gap-2">
           <button className="btn btn-success" disabled={registrosFiltrados.length === 0} onClick={ExportExcel}>
             <i className="bi bi-file-earmark-excel"></i> Exportar
+          </button>
+
+          <button className="btn btn-danger" disabled={registrosFiltrados.length === 0} onClick={ExportPDF}>
+            <i className="bi bi-file-earmark-pdf"></i> Exportar
           </button>
 
           <button className="btn btn-secondary" onClick={getRegistros}>
