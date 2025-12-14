@@ -87,19 +87,12 @@ export default function RegistrosPage() {
   const formatHora = (fechaHora: string) => {
     if (!fechaHora) return "";
   
-    const f = new Date(fechaHora);
-  
-    if (isNaN(f.getTime())) {
-      const partes = String(fechaHora).split(" ")[1];
-      return partes ? partes.slice(0, 5) : "";
+    const partes = fechaHora.split(" ");
+    if (partes.length >= 2) {
+      return partes[1].slice(0, 5);
     }
   
-    return f.toLocaleTimeString("es-HN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "America/Tegucigalpa",
-    });
+    return "";
   };
 
   //filtrado por enrollnumber, nombre apellido empleado, cargo, area, rango de fechas
