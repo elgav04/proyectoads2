@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "@/src/components/ProtectedRoute";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 export default function RegistrosPage() {
   const [registros, setRegistros] = useState<any[]>([]);
@@ -140,8 +142,105 @@ export default function RegistrosPage() {
   const ultima = () => setPage(totalPaginas);
 
   // EXPORTAR a Excel
-  //MIKE AQUI VA LA FUNCION PARA EXPORTAR A EXCEL
+  const ExportExcel = async () => {
+    if (registrosFiltrados.length === 0) {
+      alert("No hay registros para exportar");
+      return;
+    }
   
+    try {
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet("Asistencia");
+  
+      ws.columns = [
+        { header: "#", key: "index", width: 5 },
+        { header: "EnrollNumber", key: "enroll", width: 25 },
+        { header: "Empleado", key: "empleado", width: 25 },
+        { header: "Cargo", key: "cargo", width: 15 },
+        { header: "Área", key: "area", width: 15 },
+        { header: "Turno", key: "turno", width: 12 },
+        { header: "Método", key: "metodo", width: 12 },
+        { header: "Tipo Marcaje", key: "tipo", width: 20 },
+        { header: "Fecha", key: "fecha", width: 12 },
+        { header: "Hora Marcaje", key: "hora", width: 15 },
+        { header: "Hora Entrada", key: "horaEntrada", width: 15 },
+        { header: "Hora Salida", key: "horaSalida", width: 15 },
+        { header: "Estado", key: "estado", width: 25 },
+      ];
+  
+      //encabezados
+      ws.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF1F4E78" }, 
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+  
+      //agregar filas
+      registrosFiltrados.forEach((r, i) => {
+        let estado = "No marcó a tiempo";
+        let colorEstado = "FFFA9898"; 
+  
+        if (r.HoraEntrada) {
+          const fechaMarcaje = new Date(r.FechaHora);
+          const [h, m] = r.HoraEntrada.split(":").map(Number);
+          const fechaTurno = new Date(fechaMarcaje);
+          fechaTurno.setHours(h, m, 0, 0);
+  
+          const diffMs = fechaMarcaje.getTime() - fechaTurno.getTime();
+          const diffMin = diffMs / 60000; 
+  
+          if (diffMin <= 0) {
+            estado = "Marcó a tiempo";
+            colorEstado = "FFC6EFCE"; 
+          } else if (diffMin <= 15) {
+            estado = "Marcaje tardío";
+            colorEstado = "FFFFF2CC"; 
+          }
+        }
+  
+        const row = ws.addRow({
+          index: i + 1,
+          enroll: r.EnrollNumber,
+          empleado: `${r.Nombres} ${r.Apellidos}`,
+          cargo: r.Cargo,
+          area: r.Area ?? r["a.Nombre"] ?? "",
+          turno: r.Turno,
+          metodo: getVerifyModeTraduccion(Number(r.VerifyMode)),
+          tipo: getInOutTraduccion(Number(r.InOutMode)),
+          fecha: formatFecha(r.FechaHora),
+          hora: formatHora(r.FechaHora),
+          horaEntrada: r.HoraEntrada ?? "",
+          horaSalida: r.HoraSalida ?? "",
+          estado,
+        });
+  
+        //formatear estado
+        const estadoCell = row.getCell("estado");
+        estadoCell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: colorEstado },
+        };
+        estadoCell.alignment = { horizontal: "center" };
+      });
+  
+      const buf = await wb.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `asistencia_${Date.now()}.xlsx`);
+    } catch (err) {
+      console.error("Error exportando Excel:", err);
+      alert("Error exportando Excel");
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -150,7 +249,7 @@ export default function RegistrosPage() {
         <h2 className="mb-0">Registro de Asistencia</h2>
 
         <div className="d-flex gap-2">
-          <button className="btn btn-success" disabled={registrosFiltrados.length === 0}>
+          <button className="btn btn-success" disabled={registrosFiltrados.length === 0} onClick={ExportExcel}>
             <i className="bi bi-file-earmark-excel"></i> Exportar
           </button>
 
