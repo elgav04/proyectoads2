@@ -345,7 +345,10 @@ export default function RegistrosPage() {
       });
   
       const pdfBytes = await pdfDoc.save();
-      saveAs(new Blob([pdfBytes], { type: "application/pdf" }), `asistencia_${Date.now()}.pdf`);
+      const uint8Array = new Uint8Array(pdfBytes);
+
+      saveAs(new Blob([uint8Array], { type: "application/pdf" }), `asistencia_${Date.now()}.pdf`);
+  
     } catch (err) {
       console.error("Error exportando PDF:", err);
       alert("Error exportando PDF");
