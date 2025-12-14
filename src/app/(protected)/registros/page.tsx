@@ -75,24 +75,13 @@ export default function RegistrosPage() {
 
   const formatFecha = (fechaHora: string) => {
     if (!fechaHora) return "";
-
-    const f = new Date(fechaHora);
-
-    if (isNaN(f.getTime())) {
-      return String(fechaHora).split(" ")[0] ?? "";
-    }
-    return f.toISOString().split("T")[0];
+    return fechaHora.split(" ")[0];
   };
 
   const formatHora = (fechaHora: string) => {
     if (!fechaHora) return "";
-
-    const f = new Date(fechaHora);
-    if (isNaN(f.getTime())) {
-      const partes = String(fechaHora).split(" ")[1];
-      return partes ? partes.slice(0, 5) : "";
-    }
-    return f.toTimeString().slice(0, 5);
+    const partes = fechaHora.split(" ");
+    return partes[1]?.slice(0, 5) ?? "";
   };
 
   //filtrado por enrollnumber, nombre apellido empleado, cargo, area, rango de fechas
