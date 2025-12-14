@@ -84,16 +84,7 @@ export default function RegistrosPage() {
     return f.toISOString().split("T")[0];
   };
 
-  const formatHora = (fechaHora: string) => {
-    if (!fechaHora) return "";
-  
-    const partes = fechaHora.split(" ");
-    if (partes.length >= 2) {
-      return partes[1].slice(0, 5);
-    }
-  
-    return "";
-  };
+  const formatHora = (fechaHora: string) => { if (!fechaHora) return ""; const f = new Date(fechaHora); if (isNaN(f.getTime())) { const partes = String(fechaHora).split(" ")[1]; return partes ? partes.slice(0, 5) : ""; } return f.toTimeString().slice(0, 5); };
 
   //filtrado por enrollnumber, nombre apellido empleado, cargo, area, rango de fechas
   const registrosFiltrados = useMemo(() => {
